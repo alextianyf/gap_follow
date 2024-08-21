@@ -34,7 +34,6 @@ class ReactiveFollowGap(Node):
         # Start and end indices to process only the elements in front of the car
         start_index = 180
         end_index = len(ranges) - 180
-        #self.get_logger().info(f"End index:  {end_index}")
         
         i = start_index
         while i < end_index - 1:
@@ -116,12 +115,10 @@ class ReactiveFollowGap(Node):
         max_depth = -1
         current_depth = 0
         start_index = -1
-        weighted_index_sum = 0  # For calculating the weighted center
+        weighted_index_sum = 0  # For calculating the weighted center--
 
         max_distance = np.max(ranges)
         max_index = np.argmax(ranges)
-        #self.get_logger().info(f"max_distance is: {max_distance}") 
-        #self.get_logger().info(f"max_index is: {max_index}") 
 
         for i in range(180, len(ranges) - 180):
             if ranges[i] > 0:  # Part of a gap
@@ -172,12 +169,6 @@ class ReactiveFollowGap(Node):
         self.disparity_extender(proc_ranges, angle_increment)
         self.closest_point_zero_out(proc_ranges, angle_increment)
 
-        # Eliminate all points inside 'bubble'
-        # self.update_safety_bubble(proc_ranges, angle_increment, self.bubble_radius)
-
-        # Find max length gap
-        # start_i, end_i = self.find_max_gap(proc_ranges)
-
         # Find the best point in the gap
         best_index = self.find_best_point(proc_ranges)
         target_distance = ranges[int(best_index)]
@@ -190,16 +181,6 @@ class ReactiveFollowGap(Node):
         
         angle = (best_index - len(ranges) / 2) * data.angle_increment
 
-
-        #These 3 lines are for visulizing
-        # target_distance = ranges[int(best_index)]
-        # angle_increment = data.angle_increment  # Ensure angle_increment is correctly passed
-        # self.publish_target_marker(best_index, target_distance, angle_increment)
-
-
-        # self.get_logger().info(f"Best index is: {best_index}") 
-        # self.get_logger().info(f"Angle is: {angle:.2f}") 
-        # Adjust the speed
         
         max_speed = 4.72 #was 4.5
         if abs(angle)>0.78:
@@ -216,59 +197,12 @@ class ReactiveFollowGap(Node):
         
                 self.get_logger().info(f"The speed reaches maximum: {set_speed:.3f}")               
                 self.get_logger().info(f"When the front distance is: {front_distance:.3f}")
-        #alternate choice of speed control
-        # if angle < 0.2:
-        #     set_speed = max_speed
-        # elif angle < 0.5:
-        #     set_speed = 1
-        # else:i
-            # set_speed = 0.5
+
 
 
         drive_msg.drive.steering_angle = angle
         drive_msg.drive.speed = set_speed  # Set your desired speed
         self.publisher.publish(drive_msg)
-
-        # end_time = time.time()  # End time measurement
-        # elapsed_time = end_time - start_time
-        # self.get_logger().info(f"Execution time: {elapsed_time:.6f} seconds") 
-
-    # def publish_target_marker(self, best_index, target_distance, angle_increment):
-    #     marker = Marker()
-    #     marker.header.frame_id = "laser"  # Make sure this matches your RViz fixed frame
-    #     marker.header.stamp = self.get_clock().now().to_msg()
-
-    #     marker.ns = "target_point"
-    #     marker.id = 0
-
-    #     marker.type = Marker.SPHERE
-    #     marker.action = Marker.ADD
-
-    #     # Convert index and distance to coordinates
-    #     angle = (best_index - len(data.ranges) / 2) * angle_increment
-    #     x = target_distance * np.cos(angle)
-    #     y = target_distance * np.sin(angle)
-
-    #     marker.pose.position.x = x
-    #     marker.pose.position.y = y
-    #     marker.pose.position.z = 0
-
-    #     marker.pose.orientation.x = 0.0
-    #     marker.pose.orientation.y = 0.0
-    #     marker.pose.orientation.z = 0.0
-    #     marker.pose.orientation.w = 1.0
-
-    #     marker.scale.x = 0.2
-    #     marker.scale.y = 0.2
-    #     marker.scale.z = 0.2
-
-    #     marker.color.a = 1.0
-    #     marker.color.r = 1.0
-    #     marker.color.g = 0.0
-    #     marker.color.b = 0.0
-
-    #     self.marker_publisher.publish(marker)
-
 
 def main(args=None):
     rclpy.init(args=args)
